@@ -5,7 +5,7 @@ import '../models/shop.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-static const String ip = "10.0.170.39";
+static const String ip = "192.168.0.33";
 static const String baseUrl = "http://$ip:8000/api";
 static const String imageUrl = "http://$ip:8000/products";
 static const String uploadUrl = "http://$ip:8000/uploads";
@@ -221,6 +221,10 @@ static Future<String> createPayment(int total, List<Product> cart) async {
     headers: {"Content-Type": "application/json"},
     body: jsonEncode({
       "user_id": user?['id'],
+      "name": user?['name'],
+      "email": user?['email'],
+      "phone": user?['phone'],
+      "address": user?['address'],
       "total": total,
       "items": cart.map((e) => {
         "product_id": e.id,
@@ -231,6 +235,14 @@ static Future<String> createPayment(int total, List<Product> cart) async {
   );
 
   final data = jsonDecode(response.body);
+
+    print("RESPONSE PAYMENT: $data");
+  print("SNAP TOKEN: ${data['snap_token']}");
+
+  if (data['snap_token'] == null) {
+    throw Exception(data['error'] ?? "Snap token null");
+  }
+
   return data['snap_token'];
 }
 

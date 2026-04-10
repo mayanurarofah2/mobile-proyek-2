@@ -44,7 +44,7 @@ class _OrderPageState extends State<OrderPage> {
 
                         /// 🏪 NAMA TOKO
                         Text(
-  order['user']?['shop']?['store_name'] ?? '-',
+  order['seller']?['shop']?['store_name'] ?? '-',
   style: TextStyle(fontWeight: FontWeight.bold),
 ),
 
@@ -81,13 +81,13 @@ class _OrderPageState extends State<OrderPage> {
                         SizedBox(height: 10),
 
                         /// 📞 NO HP
-                        Text("Hubungi Penjual: ${order['phone'] ?? '-'}"),
+                        Text("Hubungi Penjual: ${order['seller']?['phone'] ?? '-'}"),
 
                         SizedBox(height: 10),
 
                         ElevatedButton(
                           onPressed: () async {
-                            final phone = order['phone'];
+                            final phone = order['seller']?['phone'];
                             if (phone != null) {
                               final url =
                                   Uri.parse("https://wa.me/$phone");
