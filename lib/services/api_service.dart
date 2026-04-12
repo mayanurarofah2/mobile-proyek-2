@@ -86,23 +86,6 @@ static const String uploadUrl = "http://$ip:8000/uploads";
 static Future<void> saveUser(Map<String, dynamic> user) async {
   final prefs = await SharedPreferences.getInstance();
 
-  final data = prefs.getString("users");
-  List users = [];
-
-  if (data != null) {
-    users = jsonDecode(data);
-  }
-
-  // 🔥 cek kalau email sudah ada → update
-  users.removeWhere((u) => u['email'] == user['email']);
-
-  users.add(user);
-
-  print("ALL USERS: $users");
-
-  await prefs.setString("users", jsonEncode(users));
-
-  // 🔥 set user login sekarang
   await prefs.setString("currentUser", jsonEncode(user));
   await prefs.setBool("isLogin", true);
 }
@@ -119,38 +102,7 @@ static Future<Map<String, dynamic>?> getUser() async {
 }
 
 // 🔥 AMBIL SEMUA USER
-static Future<List> getUsers() async {
-  final prefs = await SharedPreferences.getInstance();
-  final data = prefs.getString("users");
 
-  if (data != null) {
-    return jsonDecode(data);
-  }
-  return [];
-}
-
-// 🔥 LOGIN MULTI USER
-static Future<Map<String, dynamic>?> loginLocal(
-    String email, String password) async {
-
-  final users = await getUsers();
-
-  // 🔥 DEBUG DI SINI
-  print("LOGIN USERS: $users");
-
-  for (var user in users) {
-    if (user['email'] == email && user['password'] == password) {
-      final prefs = await SharedPreferences.getInstance();
-
-      await prefs.setString("currentUser", jsonEncode(user));
-      await prefs.setBool("isLogin", true);
-
-      return user;
-    }
-  }
-
-  return null;
-}
 
 // 🔥 LOGOUT
 static Future<void> logout() async {
@@ -215,16 +167,24 @@ static Future<int> getCartCount() async {
   // 🔥 CREATE PAYMENT (MIDTRANS)
 static Future<String> createPayment(int total, List<Product> cart) async {
   final user = await getUser();
+  print("USER FINAL: $user"); // 🔥 TARO DI SINI
+
+  // 🔥 VALIDASI WAJIB
+  if (user == null || user['id'] == null) {
+    throw Exception("User belum login / ID tidak ada");
+  }
+
+  print("USER YANG DIKIRIM KE BACKEND: $user");
 
   final response = await http.post(
     Uri.parse("$baseUrl/payment"),
     headers: {"Content-Type": "application/json"},
     body: jsonEncode({
-      "user_id": user?['id'],
-      "name": user?['name'],
-      "email": user?['email'],
-      "phone": user?['phone'],
-      "address": user?['address'],
+      "user_id": user['id'], // 🔥 TANPA ?
+      "name": user['name'],
+      "email": user['email'],
+      "phone": user['phone'],
+      "address": user['address'],
       "total": total,
       "items": cart.map((e) => {
         "product_id": e.id,
@@ -236,8 +196,7 @@ static Future<String> createPayment(int total, List<Product> cart) async {
 
   final data = jsonDecode(response.body);
 
-    print("RESPONSE PAYMENT: $data");
-  print("SNAP TOKEN: ${data['snap_token']}");
+  print("RESPONSE PAYMENT: $data");
 
   if (data['snap_token'] == null) {
     throw Exception(data['error'] ?? "Snap token null");

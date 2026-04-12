@@ -214,7 +214,7 @@ class _CartPageState extends State<CartPage> {
                   ),
                   onPressed: () async {
 
-                    await ApiService.clearCart();
+                   
 
                     Navigator.pop(context);
 

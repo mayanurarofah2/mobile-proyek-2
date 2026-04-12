@@ -14,32 +14,35 @@ class _RegisterPageState extends State<RegisterPage> {
   final phone = TextEditingController();
   final address = TextEditingController();
 
-  void register() async {
-  if (name.text.isEmpty ||
-      email.text.isEmpty ||
-      password.text.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Isi semua data")),
+void register() async {
+  try {
+    final res = await ApiService.register(
+      name.text.trim(),
+      email.text.trim(),
+      password.text.trim(),
+      phone.text.trim(),
+      address.text.trim(),
     );
-    return;
+
+    print("REGISTER RESPONSE: $res");
+
+    if (res['user'] != null) {
+      await ApiService.saveUser(res['user']);
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => HomePage()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Registrasi gagal")),
+      );
+    }
+  } catch (e) {
+    print("ERROR REGISTER: $e");
   }
-
- final userData = {
-  'id': DateTime.now().millisecondsSinceEpoch, // 🔥 WAJIB
-  'name': name.text.trim(),
-  'email': email.text.trim(),
-  'password': password.text.trim(),
-  'phone': phone.text.trim(),
-  'address': address.text.trim(),
-};
-
-  await ApiService.saveUser(userData);
-
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(builder: (_) => HomePage()),
-  );
 }
+
 
   @override
   Widget build(BuildContext context) {

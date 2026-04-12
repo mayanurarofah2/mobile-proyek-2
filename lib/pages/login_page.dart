@@ -13,20 +13,28 @@ class _LoginPageState extends State<LoginPage> {
   final password = TextEditingController();
 
 void login() async {
-  final user = await ApiService.loginLocal(
-    email.text.trim(),
-    password.text.trim(),
-  );
+  try {
+    final res = await ApiService.login(
+      email.text.trim(),
+      password.text.trim(),
+    );
 
-  if (user != null) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => HomePage()),
-    );
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Email / password salah")),
-    );
+    print("LOGIN RESPONSE: $res");
+
+    if (res['user'] != null) {
+      await ApiService.saveUser(res['user']);
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => HomePage()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Login gagal")),
+      );
+    }
+  } catch (e) {
+    print("ERROR LOGIN: $e");
   }
 }
 
