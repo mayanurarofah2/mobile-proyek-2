@@ -10,29 +10,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Ambil kode dari GitHub
       - name: 📥 Checkout Repository
         uses: actions/checkout@v3
 
-      # 2. Install Flutter
       - name: 🛠 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.5'
+          channel: stable
+          cache: false
 
-      # 3. Install dependencies
+      - name: 🔍 Check Flutter Version
+        run: flutter --version
+
       - name: 📦 Get Dependencies
         run: flutter pub get
 
-      # 4. Build APK
       - name: 🏗 Build APK Release
         run: flutter build apk --release
 
-      # 5. Rename APK (biar lebih jelas)
       - name: 📁 Rename APK
         run: mv build/app/outputs/flutter-apk/app-release.apk app-release.apk
 
-      # 6. Kirim ke Telegram
       - name: 📤 Send APK to Telegram
         run: |
           curl -F document=@app-release.apk \
