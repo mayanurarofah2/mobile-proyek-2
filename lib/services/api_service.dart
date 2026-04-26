@@ -5,7 +5,7 @@ import '../models/shop.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-static const String ip = "192.168.0.33";
+static const String ip = "192.168.0.13";
 static const String baseUrl = "http://$ip:8000/api";
 static const String imageUrl = "http://$ip:8000/products";
 static const String uploadUrl = "http://$ip:8000/uploads";

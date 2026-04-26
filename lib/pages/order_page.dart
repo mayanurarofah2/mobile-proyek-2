@@ -80,22 +80,30 @@ class _OrderPageState extends State<OrderPage> {
 
                         SizedBox(height: 10),
 
-                        /// 📞 NO HP
-                        Text("Hubungi Penjual: ${order['seller']?['phone'] ?? '-'}"),
+/// 📞 NO HP
+Text(
+  "Hubungi Penjual: ${order['seller']?['shop']?['phone'] ?? '-'}",
+),
 
-                        SizedBox(height: 10),
+SizedBox(height: 5),
 
-                        ElevatedButton(
-                          onPressed: () async {
-                            final phone = order['seller']?['phone'];
-                            if (phone != null) {
-                              final url =
-                                  Uri.parse("https://wa.me/$phone");
-                              await launchUrl(url);
-                            }
-                          },
-                          child: Text("Hubungi Penjual"),
-                        )
+/// 📍 ALAMAT
+Text(
+  "Alamat: ${order['seller']?['shop']?['address'] ?? '-'}",
+),
+
+SizedBox(height: 10),
+
+ElevatedButton(
+  onPressed: () async {
+    final phone = order['seller']?['shop']?['phone'];
+    if (phone != null) {
+      final url = Uri.parse("https://wa.me/$phone");
+      await launchUrl(url);
+    }
+  },
+  child: Text("Hubungi Penjual"),
+)
                       ],
                     ),
                   ),

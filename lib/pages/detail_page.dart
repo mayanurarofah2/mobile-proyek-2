@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/product.dart';
 import '../services/api_service.dart';
+import '../models/shop.dart';
 
 class DetailPage extends StatelessWidget {
   final Product product;
@@ -50,6 +51,7 @@ class DetailPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
+                  /// 🔥 NAMA + HARGA
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -67,20 +69,38 @@ class DetailPage extends StatelessWidget {
                     ],
                   ),
 
-                  SizedBox(height: 6),
+                  SizedBox(height: 8),
 
-                  Text(
-                    "Toko: ${product.storeName}",
-                    style: TextStyle(color: Colors.grey),
+                  /// 🔥 TOKO
+                  Container(
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.store, color: Colors.orange),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            product.storeName,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
 
                   SizedBox(height: 10),
 
+                  /// ⭐ RATING
                   Text("⭐ 4.8 (120 reviews)",
                       style: TextStyle(color: Colors.grey)),
 
                   SizedBox(height: 20),
 
+                  /// 🔥 DESKRIPSI
                   Text("Deskripsi",
                       style:
                           TextStyle(fontWeight: FontWeight.bold)),
@@ -90,8 +110,75 @@ class DetailPage extends StatelessWidget {
                   Text(
                       "Produk ini dibuat dengan bahan premium dan kualitas terbaik."),
 
+                  SizedBox(height: 20),
+
+                  /// ✅ 🔥 INFO PENJUAL (FIX TOTAL)
+                  FutureBuilder<List<Product>>(
+                    future: ApiService.getProducts(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) return SizedBox();
+
+                      final products = snapshot.data!;
+
+                      final current = products.firstWhere(
+                        (p) => p.id == product.id,
+                        orElse: () => product,
+                      );
+
+                      return FutureBuilder<List<Shop>>(
+                        future: ApiService.getShops(),
+                        builder: (context, shopSnap) {
+                          if (!shopSnap.hasData) return SizedBox();
+
+                          final shops = shopSnap.data!;
+
+                          final shop = shops.firstWhere(
+                            (s) => s.name == current.storeName,
+                            orElse: () => Shop(
+                              id: 0,
+                              userId: 0,
+                              name: "-",
+                              address: "-",
+                              email: "-",
+                              ownerName: "-",
+                            ),
+                          );
+
+                          return Container(
+                            padding: EdgeInsets.all(12),
+                            margin: EdgeInsets.only(top: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                    color: Colors.black12,
+                                    blurRadius: 5)
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("🏪 Info Penjual",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold)),
+
+                                SizedBox(height: 8),
+
+                                Text("Nama: ${shop.ownerName}"),
+                                Text("Email: ${shop.email}"),
+                                Text("Alamat: ${shop.address}"),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+
                   Spacer(),
 
+                  /// 🔥 BUTTON
                   Row(
                     children: [
                       Expanded(
@@ -99,6 +186,9 @@ class DetailPage extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.orange,
                             padding: EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                           onPressed: () async {
                             List<Product> cart =
@@ -115,7 +205,7 @@ class DetailPage extends StatelessWidget {
                               ),
                             );
 
-                            Navigator.pop(context, true); // 🔥 PENTING
+                            Navigator.pop(context, true);
                           },
                           child: Text("Tambah ke Keranjang"),
                         ),
